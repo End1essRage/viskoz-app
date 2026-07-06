@@ -1,0 +1,66 @@
+:root {
+  --bg: #14181c;
+  --surface: #1b2027;
+  --surface-raised: #212832;
+  --border: #2a3038;
+  --border-strong: #38414c;
+  --text: #e6e8ea;
+  --text-dim: #8b93a0;
+  --text-faint: #5a626e;
+  --accent: #3dd9c4;
+  --accent-dim: #1f5f57;
+  --success: #3dd98c;
+  --warning: #d9a73d;
+  --danger: #e5534b;
+  --font-ui: -apple-system, "Segoe UI", Inter, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+button {
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+input, select {
+  font-family: var(--font-mono);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-strong);
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}

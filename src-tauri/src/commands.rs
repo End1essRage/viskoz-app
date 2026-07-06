@@ -1,0 +1,97 @@
+use crate::cli_bridge::{run_cli_json, run_cli_json_with_log};
+use crate::rest_client::RestClient;
+use crate::types::*;
+use tauri::{AppHandle, State};
+
+#[tauri::command]
+pub async fn list_runners(rest: State<'_, RestClient>) -> Result<Vec<RunnerInfo>, String> {
+    rest.list_runners().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn list_servers(rest: State<'_, RestClient>) -> Result<Vec<ServerInfo>, String> {
+    rest.list_servers().await.map_err(|e| e.to_string())
+}
+
+/// Статус Tailscale получаем через CLI, а не REST: CLI управляет sidecar-контейнером
+/// и знает его локальный API (127.0.0.1:41234), control-plane эту информацию не хранит.
+#[tauri::command]
+pub async fn tailscale_status(app: AppHandle) -> Result<TailscaleStatusResp, String> {
+    run_cli_json(&app, &["tailscale", "status", "--json"])
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn join_mesh(app: AppHandle) -> Result<TailscaleStatusResp, String> {
+    run_cli_json(&app, &["mesh", "join", "--json"])
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn start_runner(
+    app: AppHandle,
+    params: StartRunnerParams,
+) -> Result<StartRunnerResult, String> {
+    let cpu = params.cpu_cores.to_string();
+    let mem = params.memory_mb.to_string();
+    let args = vec![
+        "runner",
+        "start",
+        "--host-data-path",
+        &params.host_data_path,
+        "--host-data-bind",
+        &params.host_data_bind,
+        "--cpu-cores",
+        &cpu,
+        "--memory-mb",
+        &mem,
+        "--json",
+    ];
+    let (result, log_lines): (StartRunnerResultRaw, Vec<String>) =
+        run_cli_json_with_log(&app, &args).await.map_err(|e| e.to_string())?;
+
+    Ok(StartRunnerResult {
+        runner_id: result.runner_id,
+        log_lines,
+    })
+}
+
+#[tauri::command]
+pub async fn start_server(
+    app: AppHandle,
+    params: StartServerParams,
+) -> Result<StartServerResult, String> {
+    let cpu = params.cpu_cores.to_string();
+    let mem = params.memory_mb.to_string();
+    let args = vec![
+        "server",
+        "start",
+        "--name",
+        &params.name,
+        "--image",
+        &params.image,
+        "--cpu-cores",
+        &cpu,
+        "--memory-mb",
+        &mem,
+        "--json",
+    ];
+    run_cli_json(&app, &args).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn stop_container(app: AppHandle, id: String) -> Result<(), String> {
+    run_cli_json::<serde_json::Value>(&app, &["container", "stop", "--id", &id, "--json"])
+        .await
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+
+// Внутренний тип для парсинга JSON от `runner start --json` (без log_lines,
+// они собираются отдельно из stdout самим cli_bridge).
+#[derive(serde::Deserialize)]
+struct StartRunnerResultRaw {
+    runner_id: String,
+}
