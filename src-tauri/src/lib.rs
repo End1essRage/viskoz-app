@@ -8,7 +8,7 @@ use rest_client::RestClient;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let control_plane_url =
-        std::env::var("CONTROL_PLANE_URL").unwrap_or_else(|_| "http://127.0.0.1:8080".into());
+        std::env::var("CONTROL_PLANE_URL").unwrap_or_else(|_| "https://cp.viskoz.dev/rest-cp".into());
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())

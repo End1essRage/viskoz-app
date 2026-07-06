@@ -1,1 +1,1 @@
-{"default":{"identifier":"default","description":"Разрешения главного окна: запуск sidecar CLI","local":true,"windows":["main"],"permissions":["core:default",{"identifier":"shell:allow-execute","allow":[{"name":"runner-cli","sidecar":true}]}]}}
+{"default":{"identifier":"default","description":"Разрешения главного окна: запуск sidecar CLI","local":true,"windows":["main"],"permissions":["core:default",{"identifier":"shell:allow-execute","allow":[{"name":"viskoz-cli","sidecar":true}]}]}}

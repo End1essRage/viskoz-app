@@ -16,9 +16,8 @@ export function tailscaleStatus() {
 
 // --- Действия: команды идут в Rust core, который спавнит CLI как sidecar-процесс ---
 
-export function startServer(params) {
-  // params: { name, image, cpuCores, memoryMb }
-  return invoke("start_server", { params });
+export function startServer(runnerId, req) {
+  return invoke("start_server", { runnerId, req });
 }
 
 export function startRunner(params) {

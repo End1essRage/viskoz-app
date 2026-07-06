@@ -60,25 +60,13 @@ pub async fn start_runner(
 
 #[tauri::command]
 pub async fn start_server(
-    app: AppHandle,
-    params: StartServerParams,
-) -> Result<StartServerResult, String> {
-    let cpu = params.cpu_cores.to_string();
-    let mem = params.memory_mb.to_string();
-    let args = vec![
-        "server",
-        "start",
-        "--name",
-        &params.name,
-        "--image",
-        &params.image,
-        "--cpu-cores",
-        &cpu,
-        "--memory-mb",
-        &mem,
-        "--json",
-    ];
-    run_cli_json(&app, &args).await.map_err(|e| e.to_string())
+    rest: State<'_, RestClient>,
+    runner_id: String,
+    req: ExecuteRequest,
+) -> Result<serde_json::Value, String> {
+    rest.execute_on_runner(&runner_id, &req)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

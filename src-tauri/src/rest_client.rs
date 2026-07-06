@@ -1,4 +1,4 @@
-use crate::types::{RunnerInfo, ServerInfo};
+use crate::types::{RunnerInfo, ServerInfo,ExecuteRequest};
 use anyhow::{anyhow, Result};
 
 #[derive(Clone)]
@@ -16,20 +16,40 @@ impl RestClient {
     }
 
     pub async fn list_runners(&self) -> Result<Vec<RunnerInfo>> {
-        let url = format!("{}/api/v1/runners", self.base_url);
+        #[derive(serde::Deserialize)]
+        struct RunnersResponse {
+            runners: Vec<RunnerInfo>,
+        }
+        
+        let url = format!("{}/v1/runners", self.base_url);
         let resp = self.client.get(&url).send().await?;
         if !resp.status().is_success() {
             return Err(anyhow!("control-plane вернул {} для {url}", resp.status()));
         }
-        Ok(resp.json::<Vec<RunnerInfo>>().await?)
+       Ok(resp.json::<RunnersResponse>().await?.runners)
     }
 
     pub async fn list_servers(&self) -> Result<Vec<ServerInfo>> {
-        let url = format!("{}/api/v1/servers", self.base_url);
+        let url = format!("{}/v1/servers", self.base_url);
         let resp = self.client.get(&url).send().await?;
         if !resp.status().is_success() {
             return Err(anyhow!("control-plane вернул {} для {url}", resp.status()));
         }
         Ok(resp.json::<Vec<ServerInfo>>().await?)
+    }
+
+    pub async fn execute_on_runner(
+    &self,
+    runner_id: &str,
+    req: &ExecuteRequest,
+    ) -> Result<serde_json::Value> {
+        let url = format!("{}/v1/dev/runners/{}/execute", self.base_url, runner_id);
+        let resp = self.client.post(&url).json(req).send().await?;
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let body = resp.text().await.unwrap_or_default();
+            return Err(anyhow!("control-plane вернул {status} для {url}: {body}"));
+        }
+        Ok(resp.json::<serde_json::Value>().await?)
     }
 }

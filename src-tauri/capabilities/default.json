@@ -9,7 +9,7 @@
       "identifier": "shell:allow-execute",
       "allow": [
         {
-          "name": "runner-cli",
+          "name": "viskoz-cli",
           "sidecar": true
         }
       ]
