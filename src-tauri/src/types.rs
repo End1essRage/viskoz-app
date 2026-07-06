@@ -30,6 +30,7 @@ pub struct TailscaleStatusResp {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StartRunnerParams {
     pub host_data_path: String,
     pub host_data_bind: String,

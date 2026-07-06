@@ -1,1 +1,3 @@
 WEBKIT_DISABLE_DMABUF_RENDERER=1 cargo tauri dev
+
+cp /home/end1essrage/Projects/MGS/cli/target/release/viskoz-cli    ./src-tauri/binaries/viskoz-cli-x86_64-unknown-linux-gnu

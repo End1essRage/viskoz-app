@@ -3,7 +3,7 @@ use serde::de::DeserializeOwned;
 use tauri::AppHandle;
 use tauri_plugin_shell::ShellExt;
 
-/// Запускает встроенный (external binary) `runner-cli` sidecar с заданными аргументами
+/// Запускает встроенный (external binary) `viskoz-cli` sidecar с заданными аргументами
 /// и ожидает от него JSON-строку на stdout (CLI должен поддерживать флаг `--json`
 /// для машиночитаемого вывода команд состояния/запуска).
 ///
@@ -13,19 +13,19 @@ use tauri_plugin_shell::ShellExt;
 pub async fn run_cli_json<T: DeserializeOwned>(app: &AppHandle, args: &[&str]) -> Result<T> {
     let shell = app.shell();
     let sidecar = shell
-        .sidecar("runner-cli")
-        .map_err(|e| anyhow!("не удалось найти sidecar runner-cli: {e}"))?;
+        .sidecar("viskoz-cli")
+        .map_err(|e| anyhow!("не удалось найти sidecar viskoz-cli: {e}"))?;
 
     let output = sidecar
         .args(args)
         .output()
         .await
-        .map_err(|e| anyhow!("ошибка запуска runner-cli: {e}"))?;
+        .map_err(|e| anyhow!("ошибка запуска viskoz-cli: {e}"))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(anyhow!(
-            "runner-cli завершился с ошибкой (код {:?}): {}",
+            "viskoz-cli завершился с ошибкой (код {:?}): {}",
             output.status.code(),
             stderr.trim()
         ));
@@ -36,10 +36,10 @@ pub async fn run_cli_json<T: DeserializeOwned>(app: &AppHandle, args: &[&str]) -
         .lines()
         .rev()
         .find(|l| !l.trim().is_empty())
-        .ok_or_else(|| anyhow!("runner-cli не вернул вывод"))?;
+        .ok_or_else(|| anyhow!("viskoz-cli не вернул вывод"))?;
 
     serde_json::from_str(last_line)
-        .map_err(|e| anyhow!("не удалось разобрать JSON от runner-cli: {e}. Вывод: {last_line}"))
+        .map_err(|e| anyhow!("не удалось разобрать JSON от viskoz-cli: {e}. Вывод: {last_line}"))
 }
 
 /// То же самое, но также возвращает построчный лог (stdout) — удобно для форм,
@@ -50,14 +50,14 @@ pub async fn run_cli_json_with_log<T: DeserializeOwned>(
 ) -> Result<(T, Vec<String>)> {
     let shell = app.shell();
     let sidecar = shell
-        .sidecar("runner-cli")
-        .map_err(|e| anyhow!("не удалось найти sidecar runner-cli: {e}"))?;
+        .sidecar("viskoz-cli")
+        .map_err(|e| anyhow!("не удалось найти sidecar viskoz-cli: {e}"))?;
 
     let output = sidecar
         .args(args)
         .output()
         .await
-        .map_err(|e| anyhow!("ошибка запуска runner-cli: {e}"))?;
+        .map_err(|e| anyhow!("ошибка запуска viskoz-cli: {e}"))?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let lines: Vec<String> = stdout.lines().map(|s| s.to_string()).collect();
@@ -65,7 +65,7 @@ pub async fn run_cli_json_with_log<T: DeserializeOwned>(
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(anyhow!(
-            "runner-cli завершился с ошибкой (код {:?}): {}",
+            "viskoz-cli завершился с ошибкой (код {:?}): {}",
             output.status.code(),
             stderr.trim()
         ));
@@ -75,10 +75,10 @@ pub async fn run_cli_json_with_log<T: DeserializeOwned>(
         .iter()
         .rev()
         .find(|l| !l.trim().is_empty())
-        .ok_or_else(|| anyhow!("runner-cli не вернул вывод"))?;
+        .ok_or_else(|| anyhow!("viskoz-cli не вернул вывод"))?;
 
     let parsed = serde_json::from_str(last_line)
-        .map_err(|e| anyhow!("не удалось разобрать JSON от runner-cli: {e}"))?;
+        .map_err(|e| anyhow!("не удалось разобрать JSON от viskoz-cli: {e}"))?;
 
     Ok((parsed, lines))
 }

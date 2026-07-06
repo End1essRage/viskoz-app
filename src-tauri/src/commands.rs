@@ -24,7 +24,7 @@ pub async fn tailscale_status(app: AppHandle) -> Result<TailscaleStatusResp, Str
 
 #[tauri::command]
 pub async fn join_mesh(app: AppHandle) -> Result<TailscaleStatusResp, String> {
-    run_cli_json(&app, &["mesh", "join", "--json"])
+    run_cli_json(&app, &["user", "connect", "--cp-address-user" ,"cp.viskoz.dev:9095", "--join-secret", "none"])
         .await
         .map_err(|e| e.to_string())
 }
@@ -39,6 +39,10 @@ pub async fn start_runner(
     let args = vec![
         "runner",
         "start",
+        "--cp-address-runner",
+        "cp.viskoz.dev:9096",
+        "--join-secret",
+        "none",
         "--host-data-path",
         &params.host_data_path,
         "--host-data-bind",
@@ -47,7 +51,6 @@ pub async fn start_runner(
         &cpu,
         "--memory-mb",
         &mem,
-        "--json",
     ];
     let (result, log_lines): (StartRunnerResultRaw, Vec<String>) =
         run_cli_json_with_log(&app, &args).await.map_err(|e| e.to_string())?;
