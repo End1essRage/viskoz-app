@@ -45,8 +45,6 @@ pub async fn start_runner(
         "none",
         "--host-data-path",
         &params.host_data_path,
-        "--host-data-bind",
-        &params.host_data_bind,
         "--cpu-cores",
         &cpu,
         "--memory-mb",

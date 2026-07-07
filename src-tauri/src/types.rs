@@ -33,7 +33,6 @@ pub struct TailscaleStatusResp {
 #[serde(rename_all = "camelCase")]
 pub struct StartRunnerParams {
     pub host_data_path: String,
-    pub host_data_bind: String,
     pub cpu_cores: u32,
     pub memory_mb: u64,
 }

@@ -2,7 +2,6 @@
   import { startRunner } from "./api.js";
 
   let hostDataPath = "/srv/runner-data";
-  let hostDataBind = "/srv/runner-data";
   let cpuCores = 4;
   let memoryMb = 4096;
   let submitting = false;
@@ -16,7 +15,6 @@
     try {
       const result = await startRunner({
         hostDataPath,
-        hostDataBind,
         cpuCores: Number(cpuCores),
         memoryMb: Number(memoryMb),
       });
@@ -37,10 +35,6 @@
     <label class="field">
       <span>путь к данным на хосте</span>
       <input class="mono" type="text" bind:value={hostDataPath} />
-    </label>
-    <label class="field">
-      <span>bind-путь для монтирования</span>
-      <input class="mono" type="text" bind:value={hostDataBind} />
     </label>
     <div style="display:flex; gap:10px;">
       <label class="field" style="flex:1;">
