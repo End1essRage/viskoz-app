@@ -1,3 +1,26 @@
-WEBKIT_DISABLE_DMABUF_RENDERER=1 cargo tauri dev
+version: "3"
 
-cp /home/end1essrage/Projects/MGS/cli/target/release/viskoz-cli    ./src-tauri/binaries/viskoz-cli-x86_64-unknown-linux-gnu
+vars:
+  GOIMPORTS_VERSION: latest
+  GOLANGCI_LINT_VERSION: v2.12.2
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+
+  run:
+    cmds:
+      - WEBKIT_DISABLE_DMABUF_RENDERER=1 cargo tauri dev
+
+  binaries:build:
+    cmds:
+      # - rustup target add x86_64-pc-windows-gnu
+      #- sudo pacman -S mingw-w64-gcc
+      - cd /home/end1essrage/Projects/MGS/cli && cargo build --release
+      - cd /home/end1essrage/Projects/MGS/cli && cargo build --release --target x86_64-pc-windows-gnu
+
+  binaries:upd:
+    cmds:
+      - cp /home/end1essrage/Projects/MGS/cli/target/release/viskoz-cli    /home/end1essrage/Projects/MGS/desktop/src-tauri/binaries/viskoz-cli-x86_64-unknown-linux-gnu
+      - cp /home/end1essrage/Projects/MGS/cli/target/x86_64-pc-windows-gnu/release/viskoz-cli.exe    /home/end1essrage/Projects/MGS/desktop/src-tauri/binaries/viskoz-cli-x86_64-pc-windows-msvc.exe
