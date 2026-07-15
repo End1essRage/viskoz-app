@@ -4,6 +4,16 @@ use crate::types::*;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
+pub async fn login(rest: State<'_, RestClient>) -> Result<Vec<RunnerInfo>, String> {
+    rest.login().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn sign_up(rest: State<'_, RestClient>) -> Result<Vec<ServerInfo>, String> {
+    rest.sign_up().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn list_runners(rest: State<'_, RestClient>) -> Result<Vec<RunnerInfo>, String> {
     rest.list_runners().await.map_err(|e| e.to_string())
 }
@@ -40,9 +50,9 @@ pub async fn start_runner(
         "runner",
         "start",
         "--cp-address-runner",
-        "cp.viskoz.dev:9096",
+        &params.cp_address,
         "--join-secret",
-        "none",
+        &params.runner_token,
         "--host-data-path",
         &params.host_data_path,
         "--cpu-cores",

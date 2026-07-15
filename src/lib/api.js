@@ -1,6 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
 
 // --- Чтение состояния: команды идут в Rust core, который бьёт в REST control-plane ---
+export function login() {
+  return invoke("login");
+}
+export function signUp() {
+  return invoke("sign_up");
+}
 
 export function listServers() {
   return invoke("list_servers");

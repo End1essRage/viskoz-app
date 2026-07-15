@@ -6,14 +6,16 @@
   import ServerForm from "./lib/ServerForm.svelte";
   import MeshPanel from "./lib/MeshPanel.svelte";
   import TailscaleBadge from "./lib/TailscaleBadge.svelte";
+  import AuthPage from "./lib/AuthPage.svelte";
 
-  const roles = [
+  const tabs = [
     { id: "admin", label: "admin" },
     { id: "user", label: "user" },
     { id: "runner", label: "runner" },
+    { id: "auth", label: "auth" },
   ];
 
-  let role = "admin";
+  let curTab = "admin";
 </script>
 
 <main style="min-height:100vh; padding: 20px 24px; display:flex; flex-direction:column; gap:18px;">
@@ -21,11 +23,11 @@
     <div style="display:flex; align-items:center; gap:16px;">
       <span style="font-size:14px; font-weight:500; letter-spacing:0.02em;">runner manager</span>
       <nav style="display:flex; gap:4px;">
-        {#each roles as r}
+        {#each tabs as r}
           <button
-            class="role-tab"
-            class:active={role === r.id}
-            on:click={() => (role = r.id)}
+            class="main-tab"
+            class:active={curTab === r.id}
+            on:click={() => (curTab = r.id)}
           >
             {r.label}
           </button>
@@ -35,7 +37,9 @@
     <TailscaleBadge />
   </header>
 
-  {#if role === "admin"}
+  {#if curTab === "auth"}
+  <AuthPage />
+  {:else if curTab === "admin"}
     <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start;">
       <ServerForm />
       <div style="flex:1; min-width:420px; display:flex; flex-direction:column; gap:18px;">
@@ -43,9 +47,9 @@
         <RunnersTable />
       </div>
     </div>
-  {:else if role === "user"}
+  {:else if curTab === "user"}
     <MeshPanel />
-  {:else if role === "runner"}
+  {:else if curTab === "runner"}
     <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start;">
       <RunnerForm />
       <div style="flex:1; min-width:420px;">
@@ -56,7 +60,7 @@
 </main>
 
 <style>
-  .role-tab {
+  .main-tab {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text-dim);
@@ -64,7 +68,7 @@
     padding: 5px 12px;
     font-size: 12px;
   }
-  .role-tab.active {
+  .main-tab.active {
     color: var(--accent);
     border-color: var(--accent);
     background: var(--accent-dim);
