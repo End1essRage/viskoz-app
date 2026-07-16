@@ -2,7 +2,6 @@
   import { startRunner } from "./api.js";
 
   let cpAddress="cp.viskoz.dev:9096";
-  let runnerToken="";
   let hostDataPath = "/srv/runner-data";
   let cpuCores = 4;
   let memoryMb = 4096;
@@ -17,7 +16,6 @@
     try {
       const result = await startRunner({
         cpAddress,
-        runnerToken,
         hostDataPath,
         cpuCores: Number(cpuCores),
         memoryMb: Number(memoryMb),
@@ -39,10 +37,6 @@
     <label class="field">
       <span>адресc control-plane</span>
       <input class="mono" type="text" bind:value={cpAddress} />
-    </label>
-    <label class="field">
-      <span>токен подключения раннера</span>
-      <input class="mono" type="text" bind:value={runnerToken} />
     </label>
     <label class="field">
       <span>путь к данным на хосте</span>

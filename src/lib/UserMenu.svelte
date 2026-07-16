@@ -1,36 +1,47 @@
 <script>
-  import { auth, curTab } from "./stores.js";
-  import { invoke } from "@tauri-apps/api/core";
+  import { auth } from "./stores.js";
+  import { logout } from "./api.js";
+  import AuthPage from "./AuthPage.svelte";
 
   let isOpen = false;
 
+  function toggle() {
+    isOpen = !isOpen;
+  }
+  function close() {
+    isOpen = false;
+  }
+
+  // клик вне контейнера закрывает меню — надёжнее, чем hover, когда внутри форма
+  function clickOutside(node) {
+    function onClick(event) {
+      if (!node.contains(event.target)) close();
+    }
+    document.addEventListener("click", onClick, true);
+    return { destroy: () => document.removeEventListener("click", onClick, true) };
+  }
+
   async function handleLogout() {
     try {
-      await invoke("logout_user");
+      await logout();
     } catch (e) {
       console.error("Logout error:", e);
     }
     auth.set({ isLoggedIn: false, username: "" });
-    $curTab = "admin";
-    isOpen = false;
+    close();
   }
 </script>
 
-<div 
-  class="user-menu-container" 
-  on:mouseenter={() => isOpen = true} 
-  on:mouseleave={() => isOpen = false}
->
+<div class="user-menu-container" use:clickOutside>
   {#if $auth.isLoggedIn}
-    <button class="user-btn">
+    <button class="user-btn" on:click={toggle}>
       <span class="avatar">{$auth.username.charAt(0).toUpperCase()}</span>
       <span class="username">{$auth.username}</span>
-      <span class="arrow">▼</span>
+      <span class="arrow" class:up={isOpen}>▼</span>
     </button>
-    
     {#if isOpen}
       <div class="dropdown">
-        <button class="dropdown-item" on:click={() => { /* логика настроек */ }}>
+        <button class="dropdown-item" on:click={close}>
           ⚙️ Настройки
         </button>
         <div class="divider"></div>
@@ -40,9 +51,14 @@
       </div>
     {/if}
   {:else}
-    <button class="login-btn" on:click={() => $curTab = "auth"}>
+    <button class="login-btn" on:click={toggle}>
       <span>🔑</span> Войти
     </button>
+    {#if isOpen}
+      <div class="dropdown auth-dropdown">
+        <AuthPage on:success={close} />
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -85,13 +101,13 @@
     color: var(--text-dim, #888);
     transition: transform 0.2s;
   }
-  .user-btn:hover .arrow {
+  .arrow.up {
     transform: rotate(180deg);
   }
   .dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
+    right: 0; /* меню теперь справа, поэтому раскрывается влево от края кнопки */
     background: var(--bg, #1a1a1a);
     border: 1px solid var(--border, #333);
     border-radius: var(--radius, 6px);
@@ -100,6 +116,10 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     z-index: 100;
     animation: fadeIn 0.15s ease-out;
+  }
+  .auth-dropdown {
+    padding: 0;
+    min-width: 260px;
   }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-4px); }

@@ -81,12 +81,12 @@ impl AppState {
         Ok(())
     }
 
-    pub async fn login(&self, username: String, password: String) -> Result<serde_json::Value> {
+    pub async fn login(&self, email: String, password: String) -> Result<serde_json::Value> {
         let url = format!("{}{}/api/v1/auth/login", self.base_url, self.auth_route);
         let resp = self
             .client
             .post(&url)
-            .json(&serde_json::json!({ "username": username, "password": password }))
+            .json(&serde_json::json!({ "email": email, "password": password }))
             .send()
             .await?;
 
@@ -109,14 +109,14 @@ impl AppState {
 
         let json_resp: serde_json::Value = resp.json().await?;
         let access_token = json_resp
-            .get("access_token")
+            .get("accessToken")
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string();
         let returned_username = json_resp
             .get("username")
             .and_then(|v| v.as_str())
-            .unwrap_or(&username)
+            .unwrap_or("")
             .to_string();
 
         self.save_refresh_cookie(&cookie_string)?;
@@ -155,7 +155,7 @@ impl AppState {
         let json_resp: serde_json::Value = resp.json().await?;
 
         let access_token = json_resp
-            .get("access_token")
+            .get("accessToken")
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string();
@@ -185,8 +185,7 @@ impl AppState {
     }
 
     // --- authenticated requests с автоматическим refresh при 401 ---
-
-    pub async fn runner_reg(&self) -> Result<()> {
+    pub async fn runner_reg(&self) -> Result<String> {
         let url = format!("{}{}/api/v1/runner-reg", self.base_url, self.auth_route);
 
         let build_req = |token: &str| {
@@ -215,13 +214,29 @@ impl AppState {
             if !retry.status().is_success() {
                 return Err(anyhow!("Ошибка доступа после обновления токена: {}", retry.status()));
             }
-            return Ok(());
+
+            let json_resp: serde_json::Value = resp.json().await?;
+            let join_secret = json_resp
+                .get("registerToken")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            return Ok(join_secret.clone());
         }
 
         if !resp.status().is_success() {
             return Err(anyhow!("Ошибка доступа: {}", resp.status()));
         }
-        Ok(())
+
+        let json_resp: serde_json::Value = resp.json().await?;
+        let join_secret = json_resp
+            .get("registerToken")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+
+        Ok(join_secret.clone())
     }
 
     pub async fn list_runners(&self) -> Result<Vec<RunnerInfo>> {

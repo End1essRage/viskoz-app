@@ -5,7 +5,7 @@ use tauri::{AppHandle, State};
 
 #[tauri::command]
 pub async fn login(rest: State<'_, AppState>, params: LoginParams) -> Result<serde_json::Value, String> {
-    rest.login(params.username, params.password).await.map_err(|e| e.to_string())
+    rest.login(params.email, params.password).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -53,13 +53,14 @@ pub async fn join_mesh(app: AppHandle) -> Result<TailscaleStatusResp, String> {
 }
 
 #[tauri::command]
-pub async fn start_runner(app: AppHandle, params: StartRunnerParams) -> Result<StartRunnerResult, String> {
+pub async fn start_runner(app: AppHandle,rest: State<'_, AppState>, params: StartRunnerParams) -> Result<StartRunnerResult, String> {
     let cpu = params.cpu_cores.to_string();
     let mem = params.memory_mb.to_string();
+    let join_secret = rest.runner_reg().await.map_err(|e| e.to_string())?;
     let args = vec![
         "runner", "start",
         "--cp-address-runner", &params.cp_address,
-        "--join-secret", &params.runner_token,
+        "--join-secret", &join_secret,
         "--host-data-path", &params.host_data_path,
         "--cpu-cores", &cpu,
         "--memory-mb", &mem,
