@@ -13,6 +13,19 @@ pub struct RunnerInfo {
     pub running_servers: u32,
 }
 
+#[derive(serde::Deserialize)]
+pub struct LoginParams {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(serde::Deserialize)]
+pub struct SignUpParams {
+    pub email: String,
+    pub username: String,
+    pub password: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServerInfo {
     pub id: String,
