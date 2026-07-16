@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use serde::de::DeserializeOwned;
 use tauri::AppHandle;
 use tauri_plugin_shell::ShellExt;

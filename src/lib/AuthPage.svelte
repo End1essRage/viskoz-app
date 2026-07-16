@@ -1,22 +1,32 @@
 <script>
-  import { login, signUp } from "./api.js";
+  import { invoke } from "@tauri-apps/api/core";
+  import { auth, curTab } from "./stores.js";
 
-  let email="";
-  let username="";
+  let email = "";
+  let username = "";
   let password = "";
-
   let submitting = false;
+  let error = "";
+  let logLines = [];
+
+  const tabs = [
+    { id: "signup", label: "signup" },
+    { id: "login", label: "login" },
+  ];
+  let activeTab = "login";
 
   async function handleLogin() {
     submitting = true;
     error = "";
     logLines = ["> logging in..."];
     try {
-      const result = await login({
-        username,
-        password,
+      const result = await invoke("login_user", {
+        req: { username, password }
       });
-      logLines = [...logLines, ...(result.log_lines || []), `> готово`];
+      logLines = [...logLines, `> готово: привет, ${result.username}`];
+      
+      auth.set({ isLoggedIn: true, username: result.username });
+      $curTab = "admin";
     } catch (e) {
       error = String(e);
       logLines = [...logLines, `> ошибка: ${e}`];
@@ -30,12 +40,14 @@
     error = "";
     logLines = ["> signing up..."];
     try {
-      const result = await signUp({
-        email,
-        username,
-        password,
+      // Убедитесь, что добавили команду sign_up_user в Rust аналогично login_user
+      const result = await invoke("sign_up_user", {
+        req: { email, username, password }
       });
-      logLines = [...logLines, ...(result.log_lines || []), `> готово`];
+      logLines = [...logLines, `> готово: аккаунт создан`];
+      
+      auth.set({ isLoggedIn: true, username: result.username });
+      $curTab = "admin";
     } catch (e) {
       error = String(e);
       logLines = [...logLines, `> ошибка: ${e}`];
@@ -43,14 +55,8 @@
       submitting = false;
     }
   }
-
-  const tabs = [
-    { id: "signup", label: "signup" },
-    { id: "login", label: "login" },
-  ];
-
-  let curTab = "login";
 </script>
+
   <nav style="display:flex; gap:4px;">
     {#each tabs as r}
       <button

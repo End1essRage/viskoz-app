@@ -3,17 +3,24 @@ mod commands;
 mod rest_client;
 mod types;
 
-use rest_client::RestClient;
+use rest_client::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let control_plane_url =
-        std::env::var("CONTROL_PLANE_URL").unwrap_or_else(|_| "https://cp.viskoz.dev/rest-cp".into());
-
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
-        .manage(RestClient::new(control_plane_url))
+        .plugin(tauri_plugin_store::init())
+        .manage(AppState::new(
+            std::env::var("CONTROL_PLANE_URL")
+                .unwrap_or_else(|_| "https://cp.viskoz.dev/rest-cp".into()),
+            "/rest-cp",
+            "/rest-cp",
+        ))
         .invoke_handler(tauri::generate_handler![
+            //commands::login_user,
+            //commands::logout_user,
+            //commands::check_auth_status,
             commands::list_runners,
             commands::list_servers,
             commands::tailscale_status,

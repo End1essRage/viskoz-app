@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Разрешения главного окна: запуск sidecar CLI",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     {
@@ -13,6 +15,7 @@
           "sidecar": true
         }
       ]
-    }
+    },
+    "store:default"
   ]
 }

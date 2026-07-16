@@ -13,7 +13,6 @@ pub struct RunnerInfo {
     pub running_servers: u32,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServerInfo {
     pub id: String,
