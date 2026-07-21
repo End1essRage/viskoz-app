@@ -67,11 +67,11 @@ impl AppState {
     // --- auth flow ---
 
     pub async fn sign_up(&self, email: String, username: String, password: String) -> Result<()> {
-        let url = format!("{}{}/api/v1/auth/signup", self.base_url, self.auth_route);
+        let url = format!("{}{}/api/v1/register", self.base_url, self.auth_route);
         let resp = self
             .client
             .post(&url)
-            .json(&serde_json::json!({ "email": email, "username": username, "password": password }))
+            .json(&serde_json::json!({ "email": email, "name": username, "password": password }))
             .send()
             .await?;
 
@@ -82,7 +82,7 @@ impl AppState {
     }
 
     pub async fn login(&self, email: String, password: String) -> Result<serde_json::Value> {
-        let url = format!("{}{}/api/v1/auth/login", self.base_url, self.auth_route);
+        let url = format!("{}{}/api/v1/login", self.base_url, self.auth_route);
         let resp = self
             .client
             .post(&url)
@@ -109,15 +109,17 @@ impl AppState {
 
         let json_resp: serde_json::Value = resp.json().await?;
         let access_token = json_resp
-            .get("accessToken")
+            .get("access_token")
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string();
         let returned_username = json_resp
-            .get("username")
+            .get("user")
+            .and_then(|u| u.get("Name"))       // или "Email", смотря что нужно
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string();
+            
 
         self.save_refresh_cookie(&cookie_string)?;
 
@@ -138,7 +140,7 @@ impl AppState {
             return Ok(serde_json::json!({ "isLoggedIn": false }));
         };
 
-        let url = format!("{}{}/api/v1/auth/refresh", self.base_url, self.auth_route);
+        let url = format!("{}{}/api/v1/refresh", self.base_url, self.auth_route);
         let resp = self
             .client
             .post(&url)
@@ -155,14 +157,15 @@ impl AppState {
         let json_resp: serde_json::Value = resp.json().await?;
 
         let access_token = json_resp
-            .get("accessToken")
+            .get("access_token")
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string();
         let username = json_resp
-            .get("username")
+            .get("user")
+            .and_then(|u| u.get("Name"))       // или "Email", смотря что нужно
             .and_then(|v| v.as_str())
-            .unwrap_or("User")
+            .unwrap_or("")
             .to_string();
 
         {
